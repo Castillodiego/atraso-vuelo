@@ -3,11 +3,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 import missingno as msng
 import warnings
-
 from datetime import datetime
+import joblib
 
 warnings.filterwarnings('ignore')
 
@@ -21,26 +20,66 @@ from sklearn.metrics import confusion_matrix, classification_report
 #se lee el dataset
 df = pd.read_csv('dataset_SCL.csv')
 
-def dif_min(data):
-    fecha_o = datetime.strptime(data['Fecha-O'], '%Y-%m-%d %H:%M:%S')
-    fecha_i = datetime.strptime(data['Fecha-I'], '%Y-%m-%d %H:%M:%S')
-    dif_min = ((fecha_o - fecha_i).total_seconds())/60
-    return dif_min
-        
-df['dif_min'] = df.apply(dif_min, axis = 1)
+xgboost_model=joblib.load('XGBoost-model.joblib') 
+transformer=joblib.load('column-transformer.joblib') 
 
-df['atraso_15'] = np.where(df['dif_min'] > 15, 1, 0)
-data = shuffle(df[['OPERA', 'MES', 'TIPOVUELO', 'SIGLADES', 'DIANOM', 'atraso_15']], random_state = 111)
-features = pd.concat([pd.get_dummies(data['OPERA'], prefix = 'OPERA'),pd.get_dummies(data['TIPOVUELO'], prefix = 'TIPOVUELO'), pd.get_dummies(data['MES'], prefix = 'MES')], axis = 1)
+def create_dictionnary(opera, mes, tipovuelo):
+    return {'OPERA':[opera],'MES':[int(mes)],'TIPOVUELO':[tipovuelo]}
+
+def pre_process(input_dictionary, column_transformer=transformer, model=xgboost_model):
+
+    dic={'OPERA':['Grupo LATAM'],'MES':[5],'TIPOVUELO':['I']}
+
+    pd_input=pd.DataFrame.from_dict(dic)
+    total_column_dummies=['encoder__x0_Aerolineas Argentinas',
+    'encoder__x0_Aeromexico',
+ 'encoder__x0_Air Canada',
+ 'encoder__x0_Air France',
+ 'encoder__x0_Alitalia',
+ 'encoder__x0_American Airlines',
+ 'encoder__x0_Austral',
+ 'encoder__x0_Avianca',
+ 'encoder__x0_British Airways',
+ 'encoder__x0_Copa Air',
+ 'encoder__x0_Delta Air',
+ 'encoder__x0_Gol Trans',
+ 'encoder__x0_Grupo LATAM',
+ 'encoder__x0_Iberia',
+ 'encoder__x0_JetSmart SPA',
+ 'encoder__x0_K.L.M.',
+ 'encoder__x0_Lacsa',
+ 'encoder__x0_Latin American Wings',
+ 'encoder__x0_Oceanair Linhas Aereas',
+ 'encoder__x0_Plus Ultra Lineas Aereas',
+ 'encoder__x0_Qantas Airways',
+ 'encoder__x0_Sky Airline',
+ 'encoder__x0_United Airlines',
+ 'encoder__x1_1',
+ 'encoder__x1_2',
+ 'encoder__x1_3',
+ 'encoder__x1_4',
+ 'encoder__x1_5',
+ 'encoder__x1_6',
+ 'encoder__x1_7',
+ 'encoder__x1_8',
+ 'encoder__x1_9',
+ 'encoder__x1_10',
+ 'encoder__x1_11',
+ 'encoder__x1_12',
+ 'encoder__x2_I',
+ 'encoder__x2_N']
 
 
-label = data['atraso_15']
+    transformed_data= column_transformer.fit_transform(pd_input)
+    features = pd.DataFrame(transformed_data, columns=column_transformer.get_feature_names())
+    features_with_missing_values=  pd.DataFrame(features, columns=total_column_dummies)
 
-x_train, x_test, y_train, y_test = train_test_split(features, label, test_size = 0.33, random_state = 42)
+    features_with_missing_values.fillna(0)
 
-logReg = LogisticRegression()
-model = logReg.fit(x_train, y_train)
 
-y_pred = model.predict(x_test)
+    prediction = model.predict(features_with_missing_values)
 
-print(y_pred)
+    return prediction
+
+       
+    
