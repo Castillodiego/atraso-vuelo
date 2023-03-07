@@ -34,13 +34,13 @@ Project structure:
 ```
 
 Los archivos más importante son:
-* trabajojuan/to-expose.ipynb - se toma el trabajo de juan, se intenta mejorar el modelo y luego se exportan las configuraciones del mejor modelo.
-* endpoints/atrasovuelo/resource.py - se implementar el mejor modelo en formato adeacuado para la API.
-* app.py - aplicación flask para inicializar y deployear api en maquina virtual.
-* deployment.yaml - configuración para el deploy en docker en GCP.
-* service.yaml - configuración para el service de docker en GCP.
-* Dockerfile - script para la ejecución de Docker
-* img/ carpeta con las imagenes para este readmme
+* `trabajojuan/to-expose.ipynb` - se toma el trabajo de juan, se intenta mejorar el modelo y luego se exportan las configuraciones del mejor modelo.
+* `endpoints/atrasovuelo/resource.py` - se implementar el mejor modelo en formato adeacuado para la API.
+* `app.py` - aplicación flask para inicializar y deployear api en maquina virtual se conecta a `resource.py` en la carpeta de `endpoints`.
+* `deployment.yaml` - configuración para el deploy en docker en GCP.
+* `service.yaml` - configuración para el service de docker en GCP.
+* `Dockerfile` - script para la ejecución de Docker
+* `img/` carpeta con las imagenes para este readmme
 
 ## Descripción del trabajo hecho 
 
