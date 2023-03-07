@@ -28,9 +28,9 @@ def home():
         return jsonify({'data': data})
 
 
-@app.route('/home', methods = ['GET'])
+@app.route('/prediction', methods = ['GET'])
 def disp():
-    content_type = request.headers.get('Content-Type')
+    #content_type = request.headers.get('Content-Type')
     """
     if (content_type == 'application/json'):
         json = request.json

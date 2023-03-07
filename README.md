@@ -1,14 +1,12 @@
-# Flask-RESTful API project template
+# Flask-RESTful API project for Neural Work
 
-This project shows one of the possible ways to implement RESTful API server.
+Este es el challenge de Neural Work realizado por Diego Castillo para el cargo de machine learning enginner
 
-There are implemented two models: User and Todo, one user has many todos.
+El proyecto tiene varias partes y se detallará lo más importante por aqui. Las herramientas utilizadas fueron
 
-Main libraries used:
-1. Flask-Migrate - for handling all database migrations.
-2. Flask-RESTful - restful API library.
-3. Flask-Script - provides support for writing external scripts.
-4. Flask-SQLAlchemy - adds support for SQLAlchemy ORM.
+1. Flask - framework para realizar apis en python
+2. GKE - Herramientas de Google Cloud Platform para desarollar contenedores Docker
+
 
 Project structure:
 ```
@@ -17,35 +15,62 @@ Project structure:
 ├── app.py
 ├── endpoints
 │   ├── __init__.py
-│   ├── todos
-│   │   ├── __init__.py
-│   │   ├── model.py
-│   │   └── resource.py
-│   └── users
+│   └── atrasovuelo
 │       ├── __init__.py
-│       ├── model.py
 │       └── resource.py
-├── manage.py
+├── trabajojuan
+│   ├── atrasos-vuelos.py
+│   ├── dataset_SCL.csv
+│   ├── synthetic_features.csv
+│   └── to-expose.ipynb
+├── img
+│   ├── flujo-GKE.png
+
+├── deployment.yaml
+├── service.yaml
 ├── requirements.txt
 └── settings.py
 ```
 
-* endpoints - holds all endpoints.
-* app.py - flask application initialization.
-* settings.py - all global app settings.
+Los archivos más importante son:
+* trabajojuan/to-expose.ipynb - se toma el trabajo de juan, se intenta mejorar el modelo y luego se exportan las configuraciones del mejor modelo.
+* endpoints/atrasovuelo/resource.py - se implementar el mejor modelo en formato adeacuado para la API.
+* app.py - aplicación flask para inicializar y deployear api en maquina virtual.
+* deployment.yaml - configuración para el deploy en docker en GCP.
+* service.yaml - configuración para el service de docker en GCP.
+* settings.py - configuración de variables de entorno (no se usa pero puede servir a futuro)
 * manage.py - script for managing application (migrations, server execution, etc.)
+* img/ carpeta con las imagenes para este readmme
+
+## Resumen del trabajo hecho
+
+En primera instancia se trabajó sobre el jupyter de de Juan en ./trabajojuan/to-expose.ipynb. Ahi mismo, se agregaron nuevas metricas, se hizo un downsampling a la clase mayoritaria y se buscaron los mejores parametros para el modelo XGBoost. De igual manera se agregaron más variables de entrada para mejorar el perfoarmance. Desde el juputer se exportan los archivos 'XGBoost-model.joblib' con la configuración del mejor modelo y 'column-transformer.joblib' con la configuración del preprocesamiento de variables dummies para trabarlos con unseen data. Al encontrar el mejor modelo hasta ese momento, se creó y testeó el script 'atrasos-vuelos.py' con data no existente. Este script creo la función que ejecuta el modelo para las variables de entrada: prediction(opera,mes,tipovuelo) y sera la funcion template para el endpoint de la API. El detalle del desarollo se encuentre en el notebook.
+
+Posteriormente, se creó la estructura API Rest utilizando la herramienta Flask. Es un framework basado en pythyon para crear APIs. Esta estructura es la que se aprecia en este proyecyo y es la base del modelo entregado. Se decidió utilizar flask dado que el proyecto estaba en python. El script princial es app.py y es el que orquesta el resto del codigo. Se creó el endpoint 'prediction' que recibe los parametros opera, mes, tipovuelo, siglades, dianom. Este endpoint se encuentra en la carpeta 'endponts/atrasovuelo/resource.py' y sigue la estructura de 'atrasos-vuelos.py'. Cabe destacar que el modelo estructurado solo permite hacer un request de un vuelo a la vez.
+
+El proyecto esta disponible en Github y se desarrollaba en la rama develop para probar las funcionalidades para hacer merge con la rama main.
+
+Para las pruebas cloud se decidió utilizar GKE: Google Kubernetes Engine. En primera instancia Google Cloud Platform dado que en mi experiencia en la mejor herramienta cloud, bien documentada y con constantes actualizaciones beneficiosas. Kubernetes Engine dado el hecho que el trabajar con clusters permite una flexibilidad mayor, mejor escabilidad y ademas del hecho que es open source. El hecho de utilizarlo en google tambien permite automatizar ciertos procesos y por lo menos para la creación de este proyecto, da facilidades de deploy rapido.
+
+Se habilitó un proyecto en GPC, se habilitó GKE y se creó
+
+
+
+## Estructura 
+
+![Alt text](img/flujo-GKE.png?raw=true "Estructura CLoud")
+
 
 ## Running 
 
-1. Clone repository.
+1. Clonar repositorio.
 2. pip install requirements.txt
 3. Run following commands:
-    1. python manage.py db init
-    2. python manage.py db migrate
-    3. python manage.py db upgrade
-4. Start server by running python manage.py runserver
+    1. python3 app.py
+
 
 ## Usage
+
 ### Users endpoint
 POST http://127.0.0.1:5000/api/users
 
