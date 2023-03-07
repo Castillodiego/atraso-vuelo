@@ -146,3 +146,8 @@ RESPONSE
 ```
 
 La respuesta es 0 si es que el algoritmo predice que no se va a atrasar y 1 si es que predice que se va a atrasar.
+
+
+## Conclusiones
+
+Se pudo crear una REST API con modelo de Machine Learning capaz de responder un flujo de request decente. No obstante hay muchas cosas que se necesitan mejorar: en primera instancia el modelo en si es poco acertivo. Se tiene que trabajar aun más las variables de entrada como elección de modelo más adoc al problema. En segundo lugar configurar el cluster de kubernetes para agregar seguridad y conexiones privadas. Tercero el cluster se quedó corto en torno a lo que se le pedia. Se deberia intentar aumentar su capacidad. El modelo sigue siendo bastante basico para un uso masivo.

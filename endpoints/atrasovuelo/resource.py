@@ -9,6 +9,7 @@ warnings.filterwarnings('ignore')
 xgboost_model=joblib.load('endpoints/atrasovuelo/XGBoost-model.joblib') 
 transformer=joblib.load('endpoints/atrasovuelo/column-transformer.joblib') 
 
+#se necesita traer la totalidad de columnas para crear dataframe de input tal y como se tenia en entrenamiento
 total_column=['encoder__x0_Aerolineas Argentinas',
     'encoder__x0_Aeromexico',
 'encoder__x0_Air Canada',
@@ -47,18 +48,25 @@ total_column=['encoder__x0_Aerolineas Argentinas',
 'encoder__x2_I',
 'encoder__x2_N']
 
-
+#esta es la funcion que estará en el endpoint
 def prediction(opera,mes,tipovuelo, column_transformer=transformer, model=xgboost_model, total_column_dummies=total_column):
-
+    
+    #se cre diccionario para crear datagrame
     input_dictionnary={'OPERA':[str(opera)],'MES':[int(mes)],'TIPOVUELO':[str(tipovuelo)]}
-
     pd_input=pd.DataFrame.from_dict(input_dictionnary)
 
+    #se hace preprocesamiento de variables dummies como en el entrenamiento
     transformed_data= column_transformer.fit_transform(pd_input)
+
+    #se crea dummies
     features = pd.DataFrame(transformed_data, columns=column_transformer.get_feature_names())
+    #se agregan las que no estan en la data
     features_with_missing_values=  pd.DataFrame(features, columns=total_column_dummies)
 
+    #se reemplaza los nan por 0
     features_with_missing_values.fillna(0)
+
+    #se hace la predicción con el modelo entrenado
     prediction = model.predict(features_with_missing_values)
     
    
@@ -66,6 +74,5 @@ def prediction(opera,mes,tipovuelo, column_transformer=transformer, model=xgboos
     return prediction[0]
 
 
-#print(prediction('Iberia', 3,'I'))
        
     
